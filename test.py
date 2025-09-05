@@ -1,8 +1,9 @@
 from insightlog.lib import filter_data
+from insightlog.lib import *
 
 
 
-analyzer = InsightLogAnalyzer('nginx', filepath='logs-samples/nginx1.sample')
+analyzer = InsightLogAnalyzer('nginx', filepath='logs-samples/empty.sample')
 analyzer.add_filter('200')
 requests = analyzer.get_requests()
 print(requests)
