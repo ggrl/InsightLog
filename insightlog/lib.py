@@ -302,7 +302,7 @@ class InsightLogAnalyzer:
         :return: string
         """
         # BUG: Large files are read into memory at once (performance issue)
-        # BUG: No warning or log for empty files
+        
         to_return = ""
         if self.data:
             for line in self.data.splitlines():
@@ -310,6 +310,8 @@ class InsightLogAnalyzer:
                     to_return += line+"\n"
         else:
             with open(self.filepath, 'r') as file_object:
+                if not any(file_object):
+                    print(f"Warning! File {file_object} is empty.")
                 for line in file_object:
                     if self.check_all_matches(line, self.__filters):
                         to_return += line
