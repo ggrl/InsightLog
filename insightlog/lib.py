@@ -62,7 +62,7 @@ def filter_data(log_filter, data=None, filepath=None, is_casesensitive=True, is_
     :param is_reverse: boolean to inverse selection
     :return: string
     """
-    # BUG: This function returns None on error instead of raising
+    
     # BUG: No encoding handling in file reading (may crash on non-UTF-8 files)
     # TODO: Log errors/warnings instead of print
     return_data = ""
