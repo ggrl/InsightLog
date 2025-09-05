@@ -65,18 +65,20 @@ def filter_data(log_filter, data=None, filepath=None, is_casesensitive=True, is_
     
     # BUG: No encoding handling in file reading (may crash on non-UTF-8 files)
     # TODO: Log errors/warnings instead of print
-    return_data = ""
+    
     if filepath:
         try:
-            with open(filepath, 'r') as file_object:
+            
+            return_data = ""
+            with open(filepath, 'r', encoding="utf-8") as file_object:
                 for line in file_object:
                     if check_match(line, log_filter, is_regex, is_casesensitive, is_reverse):
                         return_data += line
             return return_data
-        except (IOError, EnvironmentError) as e:
-            print(e.strerror)
-            # TODO: Log error instead of print
-            raise 
+        except (IOError, EnvironmentError, UnicodeDecodeError) as e:
+            with open("error.log", "a", encoding="utf-8") as error_log:
+                error_log.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n") #logs error in error.log
+            raise
     elif data:
         for line in data.splitlines():
             if check_match(line, log_filter, is_regex, is_casesensitive, is_reverse):
@@ -309,12 +311,17 @@ class InsightLogAnalyzer:
                 if self.check_all_matches(line, self.__filters):
                     to_return += line+"\n"
         else:
-            with open(self.filepath, 'r') as file_object:
-                if not any(file_object):
-                    print(f"Warning! File {file_object} is empty.")
-                for line in file_object:
-                    if self.check_all_matches(line, self.__filters):
-                        to_return += line
+            try:
+                with open(self.filepath, 'r') as file_object:
+                    if not any(file_object):
+                        print(f"Warning! File {file_object} is empty.")
+                    for line in file_object:
+                        if self.check_all_matches(line, self.__filters):
+                            to_return += line
+            except UnicodeDecodeError as e:
+                with open("error.log", "a", encoding="utf-8") as error_log:
+                    error_log.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n") #logs error in error.log
+                raise
         return to_return
 
     def get_requests(self):
