@@ -1,0 +1,23 @@
+        # iterate with progress
+        if show_progress and HAVE_TQDM:
+            try:
+                filesize = os.path.getsize(p)
+                stream = tqdm.wrapattr(fh, "read", total=filesize,
+                                       desc=os.path.basename(p),
+                                       unit="B", unit_scale=True)
+
+                def line_iter(stream, chunk_size=8192):
+                    buf = ""
+                    for chunk in iter(lambda: stream(chunk_size), ""):
+                        buf += chunk
+                        while "\n" in buf:
+                            line, buf = buf.split("\n", 1)
+                            yield line + "\n"
+                    if buf:
+                        yield buf  # last line if no trailing newline
+
+                it = line_iter(stream)
+            except Exception:
+                it = tqdm(fh, desc=os.path.basename(p), unit="lines")
+        else:
+            it = fh
